@@ -1,0 +1,839 @@
+Event Planning App
+
+1. lib/models/event.dart
+
+class Event {
+  final String id;
+  final String name;
+  final String date;
+  final String location;
+
+  Event({required this.id, required this.name, required this.date, required this.location});
+}
+__________________________________________________________________________________________________________________________________________________________________________________
+
+2. lib/models/user.dart
+class User {
+  final String id;
+  final String name;
+  final String email;
+
+  User({required this.id, required this.name, required this.email});
+}
+__________________________________________________________________________________________________________________________________________________________________________________
+
+3. lib/models/vendor.dart
+class Vendor {
+  final String id;
+  final String name;
+  final String service;
+
+  Vendor({required this.id, required this.name, required this.service});
+}
+__________________________________________________________________________________________________________________________________________________________________________________
+4. lib/screens/event_details.dart
+import 'package:flutter/material.dart';
+import '../models/event.dart';
+
+class EventDetails extends StatefulWidget {
+  final Event event;
+
+  EventDetails({required this.event});
+
+  @override
+  _EventDetailsState createState() => _EventDetailsState();
+}
+
+class _EventDetailsState extends State<EventDetails> {
+  double _opacity = 0.0;
+  Offset _position = Offset(0, 0);
+  double _scale = 1.0;
+
+  // Variable to store the dropped image URL
+  String? _droppedImageUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(seconds: 1), () {
+      setState(() {
+        _opacity = 1.0;
+      });
+    });
+  }
+
+  String _getEventImage() {
+    switch (widget.event.name.toLowerCase()) {
+      case 'wedding':
+        return 'https://cdn.pixabay.com/photo/2019/12/19/09/07/deco-4705709_1280.jpg';
+      case 'birthday party':
+        return 'https://cdn.pixabay.com/photo/2017/08/08/09/01/eat-2610768_960_720.png';
+      case 'graduation party':
+        return 'https://cdn.pixabay.com/photo/2018/05/26/06/46/graduation-cap-3430714_640.jpg';
+      case 'workshop':
+        return 'https://cdn.pixabay.com/photo/2016/10/16/21/13/workshop-1746275_640.jpg';
+      default:
+        return 'https://cdn.pixabay.com/photo/2019/12/19/09/07/deco-4705709_1280.jpg';
+    }
+  }
+
+  List<String> _getGalleryImages() {
+    switch (widget.event.name.toLowerCase()) {
+      case 'wedding':
+        return [
+          'https://cdn.pixabay.com/photo/2016/11/21/15/58/wedding-1846114_640.jpg',
+          'https://cdn.pixabay.com/photo/2023/05/27/11/03/wedding-8021285_640.jpg',
+          'https://cdn.pixabay.com/photo/2019/06/21/09/14/vintage-van-4288994_640.jpg',
+        ];
+      case 'birthday party':
+        return [
+          'https://cdn.pixabay.com/photo/2021/10/27/10/34/birthday-6746693_640.jpg',
+          'https://cdn.pixabay.com/photo/2023/12/26/11/46/cake-8470012_640.jpg',
+          'https://cdn.pixabay.com/photo/2016/10/31/19/04/balloons-1786430_640.jpg',
+        ];
+      case 'graduation party':
+        return [
+          'https://cdn.pixabay.com/photo/2018/01/03/12/33/graduation-3058263_640.jpg',
+          'https://cdn.pixabay.com/photo/2018/04/15/18/02/books-3322275_1280.jpg',
+          'https://cdn.pixabay.com/photo/2021/08/22/22/09/graduation-6566253_640.jpg',
+        ];
+      case 'workshop':
+        return [
+          'https://cdn.pixabay.com/photo/2017/08/18/08/03/idea-2654148_640.jpg',
+          'https://cdn.pixabay.com/photo/2019/04/28/15/13/pen-4163403_640.jpg',
+          'https://cdn.pixabay.com/photo/2023/01/16/17/11/feather-7722882_640.jpg',
+        ];
+      default:
+        return [
+          'https://cdn.pixabay.com/photo/2019/12/19/09/07/deco-4705709_1280.jpg',
+          'https://cdn.pixabay.com/photo/2019/05/20/17/52/wedding-4217685_960_720.jpg',
+          'https://cdn.pixabay.com/photo/2017/08/10/19/08/wedding-2616581_960_720.jpg',
+        ];
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<String> galleryImages = _getGalleryImages();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.event.name, style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: AnimatedOpacity(
+        opacity: _opacity,
+        duration: Duration(seconds: 1),
+        child: SingleChildScrollView(
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  InkResponse(
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Event image tapped!')),
+                      );
+                    },
+                    onDoubleTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Event image double-tapped!')),
+                      );
+                    },
+                    child: Transform.scale(
+                      scale: _scale,
+                      child: Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage(_getEventImage()),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    widget.event.name,
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Date: ${widget.event.date}',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  Divider(),
+                  Wrap(
+                    spacing: 8.0,
+                    runSpacing: 4.0,
+                    children: [
+                      Chip(
+                        label: Text('Location: ${widget.event.location}'),
+                        avatar: Icon(Icons.location_on, color: Colors.deepPurple),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Text('Services', style: TextStyle(fontSize: 20)),
+                  SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildServiceCard(Icons.cake, 'Cake', () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Cake service tapped!')),
+                        );
+                      }),
+                      _buildServiceCard(Icons.music_note, 'Music', () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Music service tapped!')),
+                        );
+                      }),
+                      _buildServiceCard(Icons.local_florist, 'Flowers', () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Flowers service tapped!')),
+                        );
+                      }),
+                      _buildServiceCard(Icons.photo_camera, 'Photography', () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Photography service tapped!')),
+                        );
+                      }),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Text('Vendors', style: TextStyle(fontSize: 20)),
+                  Wrap(
+                    spacing: 8.0,
+                    children: [
+                      Chip(label: Text('Catering Co.')),
+                      Chip(label: Text('DJ Service')),
+                      Chip(label: Text('Florist')),
+                      Chip(label: Text('Photographer')),
+                      Chip(label: Text('Decorations')),
+                      Chip(label: Text('Entertainment')),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Text('Gallery', style: TextStyle(fontSize: 20)),
+                  SizedBox(
+                    height: 120,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: galleryImages.length,
+                      itemBuilder: (context, index) {
+                        return Draggable<String>(
+                          data: galleryImages[index],
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: GestureDetector(
+                              onTap: () {
+                                print('Gallery image tapped: ${galleryImages[index]}');
+                              },
+                              child: CircleAvatar(
+                                radius: 50,
+                                backgroundImage: NetworkImage(galleryImages[index]),
+                              ),
+                            ),
+                          ),
+                          feedback: CircleAvatar(
+                            radius: 50,
+                            backgroundImage: NetworkImage(galleryImages[index]),
+                          ),
+                          childWhenDragging: CircleAvatar(
+                            radius: 50,
+                            backgroundColor: Colors.grey,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  DragTarget<String>(
+                    onAccept: (data) {
+                      setState(() {
+                        _droppedImageUrl = data; // Save the dropped image URL
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Image received!')),
+                      );
+                    },
+                    builder: (context, candidateData, rejectedData) {
+                      return Container(
+                        height: 100,
+                        color: Colors.blueAccent.withOpacity(0.1),
+                        child: Center(
+                          child: _droppedImageUrl == null
+                              ? Text('Drag image here')
+                              : CircleAvatar(
+                            radius: 45,
+                            backgroundImage: NetworkImage(_droppedImageUrl!),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildServiceCard(IconData icon, String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 25,
+            child: Icon(icon, color: Colors.white),
+            backgroundColor: Colors.deepPurple,
+          ),
+          SizedBox(height: 4),
+          Text(label, style: TextStyle(fontSize: 12)),
+        ],
+      ),
+    );
+  }
+}
+__________________________________________________________________________________________________________________________________________________________________________________
+
+5. lib/screens/event_list.dart
+import 'package:flutter/material.dart';
+import '../models/event.dart';
+import 'event_details.dart';
+
+class EventList extends StatefulWidget {
+  @override
+  _EventListState createState() => _EventListState();
+}
+
+class _EventListState extends State<EventList> with TickerProviderStateMixin {
+  final List<Event> events = [
+    Event(id: '1', name: 'Wedding', date: '8 September 2024', location: 'Venue Grand Marquee, Islamabad'),
+    Event(id: '2', name: 'Birthday Party', date: '15 September 2024', location: 'Venue Crown Palace, RWP'),
+    Event(id: '3', name: 'Graduation Party', date: '2 October 2024', location: 'Venue Taj Mahal, Texilla'),
+    Event(id: '4', name: 'Workshop', date: '20 October 2024', location: 'Venue Royal Complex, Sector C ISB'),
+  ];
+
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  List<AnimationController> _eventAnimControllers = [];
+  List<Animation<double>> _eventFadeAnimations = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize the main controller for staggered animations
+    _controller = AnimationController(
+      duration: Duration(seconds: 2),
+      vsync: this,
+    )..forward();
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    // Create individual animation controllers for each event for staggered animations
+    for (int i = 0; i < events.length; i++) {
+      AnimationController eventController = AnimationController(
+        duration: Duration(seconds: 2),
+        vsync: this,
+      )..forward();
+      _eventAnimControllers.add(eventController);
+      _eventFadeAnimations.add(Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(
+          parent: eventController,
+          curve: Interval(0.0 + (i * 0.2), 1.0, curve: Curves.easeInOut),
+        ),
+      ));
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _eventAnimControllers) {
+      controller.dispose();
+    }
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Events', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image:
+            NetworkImage('https://cdn.pixabay.com/photo/2017/08/06/07/16/wedding-2589803_960_720.jpg'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: ListView.builder(
+          itemCount: events.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EventDetails(event: events[index]),
+                  ),
+                );
+              },
+              child: FadeTransition(
+                opacity: _eventFadeAnimations[index],  // Apply staggered fade animation
+                child: AnimatedCrossFade(
+                  firstChild: Card(
+                    elevation: 5,
+                    margin: EdgeInsets.all(10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(events[index].name, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepPurple)),
+                    ),
+                  ),
+                  secondChild: Card(
+                    elevation: 5,
+                    margin: EdgeInsets.all(10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text('Tap for details', style: TextStyle(fontSize: 16)),
+                    ),
+                  ),
+                  crossFadeState: CrossFadeState.showFirst,
+                  duration: Duration(seconds: 4),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+__________________________________________________________________________________________________________________________________________________________________________________
+6. lib/screens/user_profile.dart
+import 'package:flutter/material.dart';
+import '../models/user.dart';
+
+class UserProfile extends StatefulWidget {
+  final User user;
+
+  UserProfile({required this.user});
+
+  @override
+  _UserProfileState createState() => _UserProfileState();
+}
+
+class _UserProfileState extends State<UserProfile> with TickerProviderStateMixin {
+  bool _isImageLoaded = false;
+  bool _showAboutMe = false;
+  late AnimationController _animationController;
+  late Animation<double> _opacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize the AnimationController
+    _animationController = AnimationController(
+      duration: Duration(seconds: 3),
+      vsync: this,
+    )..forward();
+
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+
+    // Simulate a delay for loading image and about me section
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {
+        _isImageLoaded = true;
+        _showAboutMe = true; // Fade in the About Me section
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(widget.user.name, style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: SingleChildScrollView(
+        child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: NetworkImage(
+                  'https://cdn.pixabay.com/photo/2017/08/06/07/16/wedding-2589803_960_720.jpg'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: 10),
+              // Animated crossfade between image and loading indicator
+              AnimatedCrossFade(
+                duration: Duration(seconds: 1),
+                firstChild: CircularProgressIndicator(),
+                secondChild: CircleAvatar(
+                  radius: 80,
+                  backgroundImage: NetworkImage(
+                      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRfyOa5OP-T-puERaQ9iEM5M_KVslF14IS0wA&s'),
+                ),
+                crossFadeState: _isImageLoaded
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+              ),
+              SizedBox(height: 30),
+
+              // Fade transition for name and email
+              FadeTransition(
+                opacity: _opacityAnimation,
+                child: Text('Name: ${widget.user.name}',
+                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.deepPurple)),
+              ),
+              SizedBox(height: 8),
+              FadeTransition(
+                opacity: _opacityAnimation,
+                child: Text('Email: ${widget.user.email}', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.pink)),
+              ),
+              SizedBox(height: 20),
+
+              // AnimatedOpacity for About Me section
+              AnimatedOpacity(
+                duration: Duration(seconds: 2),
+                opacity: _showAboutMe ? 1.0 : 0.0,
+                child: Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.grey,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text('About Me', style: TextStyle(fontSize: 19.5, fontWeight: FontWeight.bold, color: Colors.deepPurple)),
+                      SizedBox(height: 8),
+                      Text(
+                        'I am a passionate Event Planner with a strong background in event management and a keen eye for detail. I am committed to delivering exceptional experiences for clients and guests.',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Skills:',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+                      ),
+                      SizedBox(height: 8),
+                      Text('Event Planning, Budgeting, Vendor Management, Team Coordination',
+                          style: TextStyle(fontSize: 16, color: Colors.white)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+__________________________________________________________________________________________________________________________________________________________________________________
+7. lib/screens/vendor_list.dart
+import 'package:flutter/material.dart';
+import '../models/vendor.dart';
+
+class VendorList extends StatefulWidget {
+  @override
+  _VendorListState createState() => _VendorListState();
+}
+
+class _VendorListState extends State<VendorList> with SingleTickerProviderStateMixin {
+  bool showDetails = false;
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  final List<Vendor> vendors = [
+    Vendor(id: '1', name: 'Catering Co.', service: 'Our catering service brings delicious & diverse menu options to elevate every event. From gourmet meals to custom-designed menus,we ensure every dish is crafted with care to suit your unique theme preferences'),
+    Vendor(id: '2', name: 'DJ Service', service: 'Set the perfect tone for your event with our tailored music options. From live bands to curated playlists, we provide music that enhances the atmosphere and keeps guests entertained from start to finish'),
+    Vendor(id: '3', name: 'Florist', service: 'Our floral designs incorporate a harmonious blend of colors, textures, and scents, creating a visual feast that captivates guests and leaves a lasting impression'),
+    Vendor(id: '4', name: 'Photographer', service: 'With years of experience in capturing the essence of special occasions, we skillfully document each moment, from candid interactions to stunning staged shots'),
+    Vendor(id: '5', name: 'Decorators', service: 'Our talented decorators specialize in transforming spaces into stunning environments that reflect the unique vision and theme of your event.'),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Vendors', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: NetworkImage(
+                'https://cdn.pixabay.com/photo/2017/08/06/07/16/wedding-2589803_960_720.jpg'), // Add your image in assets
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: GridView.builder(
+          padding: const EdgeInsets.all(10),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 1.5,
+            crossAxisSpacing: 35,
+            mainAxisSpacing: 35,
+          ),
+          itemCount: vendors.length,
+          itemBuilder: (context, index) {
+            return InkWell(
+              onTap: () {
+                setState(() {
+                  showDetails = !showDetails;
+                  if (showDetails) {
+                    _controller.forward();
+                  } else {
+                    _controller.reverse();
+                  }
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Selected Vendor: ${vendors[index].name}')),
+                );
+              },
+              child: AnimatedBuilder(
+                animation: _scaleAnimation,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _scaleAnimation.value,
+                    child: child,
+                  );
+                },
+                child: Card(
+                  color: Colors.white.withOpacity(0.9),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    side: BorderSide(color: Colors.deepPurple, width: 1),
+                  ),
+                  elevation: 4, // Small elevation for a soft effect
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AnimatedCrossFade(
+                          duration: Duration(seconds: 1),
+                          firstChild: Text(
+                            vendors[index].name,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.deepPurple,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          secondChild: Text(
+                            vendors[index].service,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.italic,
+                              color: Colors.pink.shade900,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          crossFadeState: showDetails
+                              ? CrossFadeState.showSecond
+                              : CrossFadeState.showFirst,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+__________________________________________________________________________________________________________________________________________________________________________________
+8. lib/widgets/app_bar.dart
+import 'package:flutter/material.dart';
+
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      title: Text('Event Planning App'),
+    );
+  }
+
+  @override
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+}
+__________________________________________________________________________________________________________________________________________________________________________________
+
+9. lib/widgets/loading_animation.dart
+import 'package:flutter/material.dart';
+
+class LoadingAnimation extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+}
+__________________________________________________________________________________________________________________________________________________________________________________
+
+10. lib/main.dart
+import 'package:flutter/material.dart';
+import 'screens/event_list.dart';
+import 'screens/user_profile.dart';
+import 'screens/vendor_list.dart';
+import 'models/user.dart';
+
+void main() {
+  runApp(EventPlanningApp());
+}
+
+class EventPlanningApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Event Planning App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        appBarTheme: AppBarTheme(
+          centerTitle: true, // Centering the title for all app bars
+          backgroundColor: Colors.deepPurple,
+          titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
+        ),
+        scaffoldBackgroundColor: Colors.grey[200],
+      ),
+      home: HomeScreen(),
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Event Planning App'),
+          centerTitle: true, // Ensures the title is centered in HomeScreen
+          bottom: TabBar(
+            tabs: [
+              Tab(child: Text('Events', style: TextStyle(color: Colors.white))),
+              Tab(child: Text('Profile', style: TextStyle(color: Colors.white))),
+              Tab(child: Text('Vendors', style: TextStyle(color: Colors.white))),
+            ],
+          ),
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                child: Text('Navigation', style: TextStyle(color: Colors.white, fontSize: 20)),
+                decoration: BoxDecoration(
+                  color: Colors.deepPurple,
+                ),
+              ),
+              ListTile(
+                title: Text('Events'),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => EventList()));
+                },
+              ),
+              ListTile(
+                title: Text('Profile'),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (context) => UserProfile(
+                      user: User(id: '1', name: 'Saad', email: 'ms3088989@gmail.com'),
+                    ),
+                  ));
+                },
+              ),
+              ListTile(
+                title: Text('Vendors'),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => VendorList()));
+                },
+              ),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            EventList(),
+            UserProfile(user: User(id: '1', name:   'Saad', email:    'ms3088989@gmail.com')),
+            VendorList(),
+          ],
+        ),
+        bottomNavigationBar: BottomAppBar(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              IconButton(icon: Icon(Icons.home), onPressed: () {}),
+              IconButton(icon: Icon(Icons.search), onPressed: () {}),
+              IconButton(icon: Icon(Icons.settings), onPressed: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+__________________________________________________________________________________________________________________________________________________________________________________
